@@ -15,6 +15,6 @@ public class ValueComparator implements Comparator<String> {
             return -1;
         } else {
             return 1;
-        } // returning 0 would merge keys
+        }
     }
 }

@@ -1,34 +1,42 @@
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static java.lang.System.out;
+import static java.lang.System.runFinalization;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class TextProcessingTest {
     private final int limit = 10;
+    private Text textProcessor;
 
-    @Test
-    void should_return_words_size_in_the_text() {
-        String text = "Hello, this is an example for you to practice. You should grab " +
-                "this text and make it as your test case.";
-        assertThat(textProcessing(text).getWords().size()).isEqualTo(21);
+    @BeforeEach
+    void init() {
+        textProcessor = new Text(limit);
     }
 
     @Test
-    void should_return_most_common_words_used_in_the_text() {
+    void should_be_return_words_size_in_the_text() {
         String text = "Hello, this is an example for you to practice. You should grab " +
                 "this text and make it as your test case.";
-
-        System.out.println(textProcessing(text).getCommonWords());
-        assertThat(textProcessing(text).getCommonWords().size()).isEqualTo(10);
-        assertThat(textProcessing(text).getCommonWords().keySet().toArray()[0]).isEqualTo("you");
-        assertThat(textProcessing(text).getCommonWords().keySet().toArray()[1]).isEqualTo("this");
+        textProcessor.analyse(text);
+        assertThat(textProcessor.getWordsSize()).isEqualTo(21);
+        textProcessor.printAnalyse();
     }
 
     @Test
-    void should_be_processing_and_print_analyse_output() {
+    void should_be_return_most_common_words_used_in_the_text() {
         String text = "Hello, this is an example for you to practice. You should grab " +
                 "this text and make it as your test case.";
-        textProcessing(text).analyse();
+
+        textProcessor.analyse(text);
+        out.println(textProcessor.getCommonWords());
+        assertThat(textProcessor.getCommonWords().size()).isEqualTo(10);
+        assertThat(textProcessor.getCommonWordsElement(0)).isEqualTo("you");
+        assertThat(textProcessor.getCommonWordsElement(1)).isEqualTo("this");
+        textProcessor.printAnalyse();
     }
+
 
     @Test
     void should_be_ignore_a_given_piece_of_text_to_analyse() {
@@ -43,12 +51,18 @@ public class TextProcessingTest {
                 "this text and make it as your test case." +
                 "` ` `Java" +
                 "if (true) {" +
-                "  console.log('should should should')" +
+                "   out.println('should should should')" +
                 "}" +
                 "` ` `";
 
-        assertThat(textProcessing(text).getWords().size()).isEqualTo(21);
-        assertThat(textProcessing(text2).getWords().size()).isEqualTo(21);
+        textProcessor.analyse(text);
+        assertThat(textProcessor.getWordsSize()).isEqualTo(21);
+        assertThat(textProcessor.getCommonWordsElement(0)).isEqualTo("you");
+        assertThat(textProcessor.getCommonWordsElement(1)).isEqualTo("this");
+        textProcessor.analyse(text2);
+        assertThat(textProcessor.getWordsSize()).isEqualTo(21);
+        assertThat(textProcessor.getCommonWordsElement(0)).isEqualTo("you");
+        assertThat(textProcessor.getCommonWordsElement(1)).isEqualTo("this");
     }
 
     @Test
@@ -57,14 +71,13 @@ public class TextProcessingTest {
                 "this text and make it as your test case." +
                 "` ` `Java" +
                 "if (true) {" +
-                "  console.log('should should should')" +
+                "  out.println('should should should')" +
                 "}" +
                 "` ` `";
-        textProcessing(text).analyse();
-    }
+        textProcessor.analyse(text);
+        assertThat(textProcessor.getWordsSize()).isEqualTo(21);
+        assertThat(textProcessor.getCommonWordsElement(0)).isEqualTo("you");
+        assertThat(textProcessor.getCommonWordsElement(1)).isEqualTo("this");
 
-
-    private TextProcessing textProcessing(String text){
-        return new TextProcessing(text,limit);
     }
 }
