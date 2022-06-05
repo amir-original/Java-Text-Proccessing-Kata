@@ -1,21 +1,17 @@
 import java.util.*;
 
-import static java.lang.System.in;
 import static java.lang.System.out;
 
 public class Text implements Processor {
 
     private final int limit;
-    private List<String> words;
-    private Map<String, Integer> commonWords;
-    private final AnalysePrinter printer;
+    private List<String> words= new LinkedList<>();
+    private Map<String, Integer> commonWords = new LinkedHashMap<>();
+    private final AnalysePrinter printer = new AnalysePrinter(this);
 
 
     public Text(int limit) {
         this.limit = limit;
-        this.commonWords = new LinkedHashMap<>();
-        this.words = new LinkedList<>();
-        this.printer = new AnalysePrinter();
     }
 
     public void analyse(final String text) {
@@ -26,9 +22,8 @@ public class Text implements Processor {
 
     @Override
     public void printAnalyse() {
-        printer.printAnalyse(getTopTenFirstItems(commonWords), getWordsSize());
+        printer.printAnalyse();
     }
-
 
     public List<String> getWords(String text) {
         String[] words = findWords(text);
@@ -57,7 +52,7 @@ public class Text implements Processor {
         try {
             element = ConvertToArray(map)[index].toString();
         } catch (Exception e) {
-            logError(map, index);
+            printReportError(map, index);
             throw e;
         }
         return element;
@@ -67,14 +62,14 @@ public class Text implements Processor {
         return map.keySet().toArray();
     }
 
-    private void logError(Map<String, Integer> map, Integer index) {
-        out.println("Array Index Out Of Bounds Exception. Array size: "
-                + map.size() + " But Entered: " + index);
+    private void printReportError(Map<String, Integer> map, Integer index) {
+        String report = String.format("Array Index Out Of Bounds Exception. Array size: %d But Entered: %d", map.size(), index);
+        out.println(report);
     }
 
 
     private int getCommonWordsSize() {
-        return getCommonWords().size();
+        return commonWords.size();
     }
 
     private Map<String, Integer> findCommonWords() {
@@ -96,15 +91,15 @@ public class Text implements Processor {
         return value != null ? value + 1 : 1;
     }
 
+    public Map<String, Integer> getTopTenFirstItems(){
+        return getTopTenFirstItems(commonWords);
+    }
     private Map<String, Integer> getTopTenFirstItems(Map<String, Integer> sortedMap) {
         Map<String, Integer> map = new LinkedHashMap<>();
         int counter = 0;
         for (Map.Entry<String, Integer> entry : sortedMap.entrySet()) {
-            if (isOutOfLimit(counter)) {
-                String key = entry.getKey();
-                Integer value = entry.getValue();
-                map.put(key, value);
-            }
+            if (isOutOfLimit(counter))
+                map.put(entry.getKey(), entry.getValue());
             counter++;
         }
         return map;
