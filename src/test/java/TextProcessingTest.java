@@ -2,9 +2,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static java.lang.System.out;
-import static java.lang.System.runFinalization;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
 public class TextProcessingTest {
     private final int limit = 10;
@@ -30,8 +28,8 @@ public class TextProcessingTest {
                 "this text and make it as your test case.";
 
         textProcessor.analyse(text);
-        out.println(textProcessor.getCommonWords());
-        assertThat(textProcessor.getCommonWords().size()).isEqualTo(10);
+        out.println(textProcessor.getSortedCommonWords());
+        assertThat(textProcessor.getSortedCommonWords().size()).isEqualTo(10);
         assertThat(textProcessor.getCommonWordsElement(0)).isEqualTo("you");
         assertThat(textProcessor.getCommonWordsElement(1)).isEqualTo("this");
         textProcessor.printAnalyse();
@@ -78,6 +76,5 @@ public class TextProcessingTest {
         assertThat(textProcessor.getWordsSize()).isEqualTo(21);
         assertThat(textProcessor.getCommonWordsElement(0)).isEqualTo("you");
         assertThat(textProcessor.getCommonWordsElement(1)).isEqualTo("this");
-
     }
 }

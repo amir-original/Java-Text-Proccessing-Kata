@@ -5,10 +5,9 @@ import static java.lang.System.out;
 public class Text implements Processor {
 
     private final int limit;
-    private List<String> words= new LinkedList<>();
-    private Map<String, Integer> commonWords = new LinkedHashMap<>();
+    private List<String> words = new LinkedList<>();
+    private final Map<String, Integer> commonWords = new LinkedHashMap<>();
     private final AnalysePrinter printer = new AnalysePrinter(this);
-
 
     public Text(int limit) {
         this.limit = limit;
@@ -16,41 +15,81 @@ public class Text implements Processor {
 
     public void analyse(final String text) {
         String filteredText = ignoreSnippetsCode(text);
-        words = getWords(filteredText);
-        commonWords = findCommonWords();
+        List<String> textWords = getWords(filteredText);
+        findCommonWords(textWords);
     }
 
-    @Override
-    public void printAnalyse() {
-        printer.printAnalyse();
+    private String ignoreSnippetsCode(String text) {
+        return text.replaceAll("` ` `(?<language>\\w)(.*?)` ` `$", "");
     }
 
     public List<String> getWords(String text) {
-        String[] words = findWords(text);
-        return convertToList(words);
+        words = getListOf(findWords(text));
+        return words;
     }
 
-    public int getWordsSize() {
-        return words.size();
+    private String[] findWords(String text) {
+        return text.toLowerCase().replaceAll("[,.]", "").split(" ");
     }
 
+    private List<String> getListOf(String[] array) {
+        return Arrays.asList(array);
+    }
 
-    public Map<String, Integer> getCommonWords() {
-        TreeMap<String, Integer> sortedCommonWords = sortedMapByValue(commonWords);
+    private void findCommonWords(List<String> words) {
+        for (String word : words) {
+            int n = getNumberOfWordRepeat(commonWords, word);
+            commonWords.put(word, n);
+        }
+    }
 
+    private int getNumberOfWordRepeat(Map<String, Integer> commonWords, String word) {
+        Integer wordCount = commonWords.get(word);
+        return isNotNull(wordCount) ? wordCount + 1 : 1;
+    }
+
+    private boolean isNotNull(Integer value) {
+        return !isNull(value);
+    }
+    private boolean isNull(Integer value) {
+        return value == null;
+    }
+
+    public String getCommonWordsElement(Integer index) {
+        return getElement(getSortedCommonWords(), index);
+    }
+
+    public Map<String, Integer> getSortedCommonWords() {
+        Map<String, Integer> sortedCommonWords = getSortedCommonWordsByValue();
         sortedCommonWords.putAll(commonWords);
 
         return getTopTenFirstItems(sortedCommonWords);
     }
 
-    public String getCommonWordsElement(Integer index) {
-        return getElement(getCommonWords(), index);
+    private Map<String, Integer> getSortedCommonWordsByValue() {
+        ValueComparator bvc = new ValueComparator(commonWords);
+        return new TreeMap<>(bvc);
+    }
+
+    private Map<String, Integer> getTopTenFirstItems(Map<String, Integer> sortedMap) {
+        Map<String, Integer> topTenFirstItems = new LinkedHashMap<>();
+        int counter = 0;
+        for (Map.Entry<String, Integer> entry : sortedMap.entrySet()) {
+            if (isOutOfLimit(counter))
+                topTenFirstItems.put(entry.getKey(), entry.getValue());
+            counter++;
+        }
+        return topTenFirstItems;
+    }
+
+    private boolean isOutOfLimit(int counter) {
+        return counter < limit;
     }
 
     public String getElement(Map<String, Integer> map, Integer index) {
         String element;
         try {
-            element = ConvertToArray(map)[index].toString();
+            element = getArrayOf(map)[index].toString();
         } catch (Exception e) {
             printReportError(map, index);
             throw e;
@@ -58,67 +97,29 @@ public class Text implements Processor {
         return element;
     }
 
-    private Object[] ConvertToArray(Map<String, Integer> map) {
+    private Object[] getArrayOf(Map<String, Integer> map) {
         return map.keySet().toArray();
     }
 
     private void printReportError(Map<String, Integer> map, Integer index) {
-        String report = String.format("Array Index Out Of Bounds Exception. Array size: %d But Entered: %d", map.size(), index);
-        out.println(report);
+        out.println(reportError(map, index));
     }
 
-
-    private int getCommonWordsSize() {
-        return commonWords.size();
-    }
-
-    private Map<String, Integer> findCommonWords() {
-        Map<String, Integer> commonWords = new HashMap<>();
-        for (String word : words) {
-            int n = getNumberOfWordRepeat(commonWords, word);
-            commonWords.put(word, n);
-        }
-        return commonWords;
-    }
-
-    private TreeMap<String, Integer> sortedMapByValue(Map<String, Integer> map) {
-        ValueComparator bvc = new ValueComparator(map);
-        return new TreeMap<>(bvc);
-    }
-
-    private int getNumberOfWordRepeat(Map<String, Integer> commonWords, String word) {
-        Integer value = commonWords.get(word);
-        return value != null ? value + 1 : 1;
+    private String reportError(Map<String, Integer> map, Integer index) {
+        return String.format("Array Index Out Of Bounds Exception." + " Array size: %d But En: %d", map.size(), index);
     }
 
     public Map<String, Integer> getTopTenFirstItems(){
         return getTopTenFirstItems(commonWords);
     }
-    private Map<String, Integer> getTopTenFirstItems(Map<String, Integer> sortedMap) {
-        Map<String, Integer> map = new LinkedHashMap<>();
-        int counter = 0;
-        for (Map.Entry<String, Integer> entry : sortedMap.entrySet()) {
-            if (isOutOfLimit(counter))
-                map.put(entry.getKey(), entry.getValue());
-            counter++;
-        }
-        return map;
+
+    public int getWordsSize() {
+        return words.size();
     }
 
-    private List<String> convertToList(String[] array) {
-        return Arrays.asList(array);
-    }
-
-    private boolean isOutOfLimit(int counter) {
-        return counter < this.limit;
-    }
-
-    private String ignoreSnippetsCode(String text) {
-        return text.replaceAll("` ` `(?<language>\\w)(.*?)` ` `$", "");
-    }
-
-    private String[] findWords(String text) {
-        return text.toLowerCase().replaceAll("[,.]", "").split(" ");
+    @Override
+    public void printAnalyse() {
+        printer.printAnalyse();
     }
 
 }

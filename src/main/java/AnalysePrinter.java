@@ -15,22 +15,18 @@ public class AnalysePrinter {
         print(statement);
     }
 
-    public void print(String text) {
-        out.println(text);
+    public String header() {
+        return "Those are the top 10 words used:";
     }
 
     public String orderMapNumber(Map<String, Integer> map){
-        int number = 1;
         StringBuilder statement = new StringBuilder();
+        int number = 1;
         for (String key : map.keySet()) {
             statement.append(formatNumber(number, key));
             number++;
         }
         return statement.toString();
-    }
-
-    public String header() {
-        return "Those are the top 10 words used:";
     }
 
     private String formatNumber(int number, String key) {
@@ -39,5 +35,9 @@ public class AnalysePrinter {
 
     public String footer(Integer wordsSize) {
         return String.format("The text has in total %d words",wordsSize);
+    }
+
+    public void print(String text) {
+        out.println(text);
     }
 }
